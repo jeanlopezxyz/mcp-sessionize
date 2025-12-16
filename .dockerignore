@@ -1,0 +1,11 @@
+.git
+.gitignore
+.idea
+*.iml
+.vscode
+target
+npm
+*.md
+docs
+LICENSE
+.github
