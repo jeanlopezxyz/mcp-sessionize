@@ -40,6 +40,8 @@ public final class SessionizeModel {
         String startsAt,
         String endsAt,
         String room,
+        boolean isConfirmed,
+        boolean isServiceSession,
         List<SpeakerRef> speakers,
         List<Category> categories
     ) {}

@@ -277,8 +277,8 @@ public class SessionizeTool {
     }
 
     /**
-     * Fetches scheduled sessions for an event, flattening session groups with null safety.
-     * Only returns sessions with a start time (i.e., placed on the schedule / approved).
+     * Fetches confirmed sessions for an event, flattening session groups with null safety.
+     * Only returns sessions that are confirmed and not service sessions (breaks, registration, etc.).
      */
     private List<Session> fetchAllSessions(String eventId) {
         var sessionGroups = client.getSessions(eventId);
@@ -289,7 +289,8 @@ public class SessionizeTool {
             .filter(group -> group.sessions() != null)
             .flatMap(group -> group.sessions().stream())
             .filter(Objects::nonNull)
-            .filter(session -> session.startsAt() != null)
+            .filter(Session::isConfirmed)
+            .filter(session -> !session.isServiceSession())
             .toList();
     }
 
