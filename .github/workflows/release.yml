@@ -14,9 +14,9 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+# Least privilege at the top level; each job opts into exactly what it needs.
 permissions:
-  contents: write
-  packages: write
+  contents: read
 
 jobs:
   # ===========================================
@@ -92,6 +92,8 @@ jobs:
     name: Create Release
     needs: build-native
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # create the GitHub Release and upload assets
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
@@ -174,6 +176,9 @@ jobs:
     name: Publish Docker Image
     needs: release
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write   # push image to ghcr.io
     steps:
       - uses: actions/checkout@v5
 
@@ -214,6 +219,9 @@ jobs:
     name: Publish to npm
     needs: [release, build-native]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write   # mint OIDC token for npm provenance (SLSA)
     steps:
       - uses: actions/checkout@v5
 
@@ -376,7 +384,7 @@ jobs:
           for PKG in mcp-sessionize-darwin-arm64 mcp-sessionize-darwin-x64 mcp-sessionize-linux-x64 mcp-sessionize-windows-x64; do
             echo "Publishing $PKG..."
             cd npm/$PKG
-            npm publish --access public
+            npm publish --provenance --access public
             cd ../..
           done
         env:
@@ -385,6 +393,6 @@ jobs:
       - name: Publish main package
         run: |
           cd npm/mcp-sessionize
-          npm publish --access public
+          npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

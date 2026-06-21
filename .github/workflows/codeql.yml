@@ -1,0 +1,39 @@
+name: CodeQL
+
+# Static Application Security Testing (SAST) for the Java sources.
+# Uses build-mode: none so it does not need to compile (avoids JDK/Quarkus
+# build coupling) while still running CodeQL's dataflow security queries.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '23 5 * * 1'  # weekly, Monday 05:23 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze Java
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write   # required to upload results to the Security tab
+      actions: read
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java-kotlin
+          build-mode: none
+          queries: security-extended
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:java-kotlin"

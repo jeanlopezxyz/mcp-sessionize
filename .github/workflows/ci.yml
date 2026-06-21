@@ -24,6 +24,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Least privilege by default; jobs that need more (e.g. docker push) opt in.
+permissions:
+  contents: read
+
 jobs:
   # ===========================================
   # Build and Test
