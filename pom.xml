@@ -12,8 +12,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>3.30.2</quarkus.platform.version>
-        <mcp.server.version>1.8.1</mcp.server.version>
+        <quarkus.platform.version>3.33.2</quarkus.platform.version>
+        <mcp.server.version>1.13.0</mcp.server.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
     </properties>
@@ -24,6 +24,14 @@
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>${quarkus.platform.artifact-id}</artifactId>
                 <version>${quarkus.platform.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- MCP Server BOM: gestiona la versión de todos los artefactos quarkus-mcp-server -->
+            <dependency>
+                <groupId>io.quarkiverse.mcp</groupId>
+                <artifactId>quarkus-mcp-server-bom</artifactId>
+                <version>${mcp.server.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -42,12 +50,10 @@
         <dependency>
             <groupId>io.quarkiverse.mcp</groupId>
             <artifactId>quarkus-mcp-server-http</artifactId>
-            <version>${mcp.server.version}</version>
         </dependency>
         <dependency>
             <groupId>io.quarkiverse.mcp</groupId>
             <artifactId>quarkus-mcp-server-stdio</artifactId>
-            <version>${mcp.server.version}</version>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
