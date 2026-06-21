@@ -32,26 +32,26 @@ class SessionizeToolTest {
 
     @Test
     void testGetSpeakersWithoutEventId() {
-        var response = tool.getSpeakers("", NOOP_LOG).await().atMost(TIMEOUT);
+        var response = tool.getSpeakers("", 25, 0, NOOP_LOG).await().atMost(TIMEOUT);
         assertNotNull(response);
     }
 
     @Test
     void testFindSpeakerWithEmptyName() {
-        var response = tool.findSpeaker("", "test-event", NOOP_LOG).await().atMost(TIMEOUT);
+        var response = tool.findSpeaker("", "test-event", 25, 0, NOOP_LOG).await().atMost(TIMEOUT);
         assertNotNull(response);
         assertTrue(response.isError());
     }
 
     @Test
     void testGetSessionsWithoutEventId() {
-        var response = tool.getSessions("", NOOP_LOG).await().atMost(TIMEOUT);
+        var response = tool.getSessions("", 25, 0, NOOP_LOG).await().atMost(TIMEOUT);
         assertNotNull(response);
     }
 
     @Test
     void testFindSessionWithEmptyQuery() {
-        var response = tool.findSession("", "test-event", NOOP_LOG).await().atMost(TIMEOUT);
+        var response = tool.findSession("", "test-event", 25, 0, NOOP_LOG).await().atMost(TIMEOUT);
         assertNotNull(response);
         assertTrue(response.isError());
     }
