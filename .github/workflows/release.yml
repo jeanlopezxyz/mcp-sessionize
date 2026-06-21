@@ -311,8 +311,65 @@ jobs:
           }
           EOF
 
-          # Copy LICENSE to main package
+          # Copy LICENSE and README to main package
           cp LICENSE npm/mcp-sessionize/ || echo "No LICENSE file found"
+          cp README.md npm/mcp-sessionize/ || echo "No README file found"
+
+          # Generate the bin launcher that resolves and spawns the platform-specific
+          # native binary. Without this file the published package has no runnable bin,
+          # so `npx mcp-sessionize` fails with "command not found".
+          mkdir -p npm/mcp-sessionize/bin
+          cat > npm/mcp-sessionize/bin/index.js << 'INDEXEOF'
+          #!/usr/bin/env node
+
+          const childProcess = require('child_process');
+
+          const BINARY_MAP = {
+            darwin_arm64: {name: 'mcp-sessionize-darwin-arm64', suffix: ''},
+            darwin_x64: {name: 'mcp-sessionize-darwin-x64', suffix: ''},
+            linux_x64: {name: 'mcp-sessionize-linux-x64', suffix: ''},
+            win32_x64: {name: 'mcp-sessionize-windows-x64', suffix: '.exe'},
+          };
+
+          const resolveBinaryPath = () => {
+            try {
+              const binary = BINARY_MAP[`${process.platform}_${process.arch}`];
+              if (!binary) {
+                throw new Error(`Unsupported platform: ${process.platform}/${process.arch}`);
+              }
+              return require.resolve(`${binary.name}/bin/${binary.name}${binary.suffix}`);
+            } catch (e) {
+              throw new Error(`Could not resolve binary path for platform/arch: ${process.platform}/${process.arch}`);
+            }
+          };
+
+          const child = childProcess.spawn(resolveBinaryPath(), process.argv.slice(2), {
+            stdio: 'inherit',
+            env: process.env,
+          });
+
+          const handleSignal = (signal) => {
+            if (child && !child.killed) {
+              child.kill(signal);
+            }
+          };
+
+          ['SIGTERM', 'SIGINT', 'SIGHUP'].forEach((signal) => {
+            process.on(signal, () => handleSignal(signal));
+          });
+
+          child.on('close', (code, signal) => {
+            if (signal) {
+              process.exit(128 + (signal === 'SIGTERM' ? 15 : signal === 'SIGINT' ? 2 : 1));
+            } else {
+              process.exit(code || 0);
+            }
+          });
+          INDEXEOF
+          chmod +x npm/mcp-sessionize/bin/index.js
+
+          # Sanity check: fail the release if the launcher is missing
+          test -f npm/mcp-sessionize/bin/index.js || { echo "ERROR: bin/index.js missing"; exit 1; }
 
       - name: Publish platform packages
         run: |
